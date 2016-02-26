@@ -23,7 +23,9 @@ app.use(methodOverride());
 
 
 // define model ==============================================
-
+var Todo = mongoose.model('Todo', {
+	text : String
+});
 
 
 // listen (start app with node server.js) ========================
