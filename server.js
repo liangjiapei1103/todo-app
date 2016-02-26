@@ -65,7 +65,7 @@ var Todo = mongoose.model('Todo', {
 	});
 
 	// delete a todo
-	app.delete('/appi/todos/:todo_id', function (req, res) {
+	app.delete('/api/todos/:todo_id', function (req, res) {
 		Todo.remove({
 			_id: req.params.todo_id
 		}, function (err, rodo) {
