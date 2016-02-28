@@ -1,3 +1,3 @@
 // public/core.js
 
-angular.module('todo', ['todoController', 'todoService']);
+angular.module('todo', ['todoController', 'todoService', 'listService']);

@@ -29,6 +29,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script><!-- load angular -->
         <script src="js/controllers/main.js"></script> <!-- load up our controller -->
         <script src="js/services/todos.js"></script> <!-- load our todo service -->
+        <script src="js/services/lists.js"></script>
         <script src="js/core.js"></script>
     </head>
 
@@ -52,6 +53,23 @@
             <a class="navbar-brand" href="#">Todo List</a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
+
+            <ul class="nav navbar-nav navbar-left">
+  
+              <li ng-model="lTitle"></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">My Lists<span class="caret"></span></a>
+                
+                <ul class="dropdown-menu">
+
+                  <li ng-repeat="list in lists">
+                    
+                    <!-- <a ng-href="/api/list/{{list._id}}">{{list.listTitle}}</a> -->
+                    <a href ng-click="getList(list._id)">{{list.listTitle}}</a>
+                  </li>
+                </ul>
+
+            </ul>
 
             <ul class="nav navbar-nav navbar-right">
               
@@ -87,10 +105,33 @@
             <% if (!user) { %>
                 <div class="alert alert-danger"><%= message %></div>
             <% } %>
+
+            <!-- FORM TO CREATE Lists -->
+            <div id="todo-form" class="row">
+              <form>
+                  <div class="form-group">
+                    <div class="col-sm-10 text-center">
+                                
+                                <!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
+                                <input type="text" class="form-control input-lg text-center" placeholder="New List Title" ng-model="formData.list">
+                    </div>
+
+                     <div class="col-sm-2 text-center">
+                                <!-- createTodo() WILL CREATE NEW TODOS -->
+                                <button type="submit" class="btn btn-primary btn-lg" ng-disabled="!formData.list.length || buttonDisabled" ng-click="createList()">new List</button>
+            
+                    </div>
+                  </div>
+                </form>
+            </div>
+
+            <br>
+
+            <div class="row">
             
             <!-- HEADER AND TODO COUNT -->
             <div class="jumbotron text-center">
-                <h1>Todo List <% if (user) { %><span class="label label-info">{{ todos.length }}</span><% } %></h1>
+                <h1 ng-model="lTitle"> {{listTitle}} <% if (user) { %><span class="label label-info">{{todos.length}}</span><% } %></h1>
             </div>
 
             <!-- TODO LIST -->
@@ -114,7 +155,7 @@
                         <div class="form-group">
                             
                             <!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
-                            <input type="text" class="form-control input-lg text-center" placeholder="Thing to do" ng-model="formData.text">
+                            <input type="text" class="form-control input-lg text-center" placeholder="Thing to do" name="text" ng-model="formData.text">
 
                         </div>
 

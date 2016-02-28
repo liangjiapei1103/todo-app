@@ -6,6 +6,7 @@ var Schema = mongoose.Schema;
 
 var todoSchema = mongoose.Schema({
 	owner: {type: Schema.Types.ObjectId, ref: 'User'},
+	list: {type: Schema.Types.ObjectId, ref: 'List'},
 	text: String,
 	done: Boolean
 });

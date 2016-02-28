@@ -3,13 +3,17 @@
 // load the todo model
 var Todo = require('./models/todo');
 var User = require('./models/user');
+var List = require('./models/list');
 
 // expose the routes to our app with module.exports
 module.exports = function (app, passport) {
 
 	// Home page (with login links) ==========================
 	app.get('/', function (req, res) {
-		res.render('./index.ejs', { user: req.user, message: 'You need to login to post Todos' }); // load the index.ejs file
+		res.render('./index.ejs', { 
+			user: req.user, 
+			message: 'You need to login to post Todos' 
+		}); // load the index.ejs file
 	});
 
 	// Login Page ===========================================
@@ -82,65 +86,206 @@ module.exports = function (app, passport) {
 	// api ---------------------------------------
 
 	//get all todos
-	app.get('/api/todos', isLoggedIn, function(req, res) {
+	app.get('/api/list/:list_id', isLoggedIn, function(req, res) {
 
+		 if (req.params.list_id != ':list_id') {
 		
-		// use mongoose to get all todos in the database
-		Todo.find({owner: req.user._id})
-		.exec(function (err, todos) {
-			// if there is an error retrieving, send the error. nothing after res.send(err) will execute
-			if (err)
-				res.send(err);
+			console.log("req.params.list_id= " + req.params.list_id );
+			// use mongoose to get all todos in the database
+			List
+			.findOne({
+				_id: req.params.list_id
+			})
+			.populate('todos')
+			.exec(function (err, list) {
+				// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+				if (err) {
+					console.log("Error1: " + err);
+					return res.send(err);
+				}
 
-			res.json(todos); // return all todos in JSON format
-		});
+				res.json(list); // return all todos in JSON format
+			});
+		} else {
+			// use mongoose to get all todos in the database
+			List
+			.findOne({
+				_id: req.user.info.currentList,
+			})
+			.populate('todos')
+			.exec(function (err, list) {
+				// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+				if (err) {
+					console.log("Error2: " + err);
+					return res.send(err);
+				}
+				console.log("todos: " + list);
+
+				res.json(list); // return all todos in JSON format
+			});
+		}
 	
 
 		
 	});
 
 	// create todo and send back all todos after creation
-	app.post('/api/todos/', isLoggedIn, function (req, res) {
-		// create a todo, information comes from AJAX request from Angular
-		Todo.create({
-			owner: req.user._id,
-			text: req.body.text,
-			done: false
-		}, function (err, todo) {
-			if (err)
-				res.send(err);
+	app.post('/api/list/:list_id', isLoggedIn, function (req, res) {
+		
+		if (req.params.list_id != ':list_id') {
 
-			// use mongoose to get all todos in the database
-			Todo.find({owner: req.user._id})
-			.exec(function (err, todos) {
-				// if there is an error retrieving, send the error. nothing after res.send(err) will execute
-				if (err)
-					res.send(err);
+			var newTodo = new Todo();
+			newTodo.owner = req.user._id;
+			newTodo.list = req.params.list_id,
+			newTodo.text = req.body.text,
+			newTodo.done = false;
 
-				res.json(todos); // return all todos in JSON format
+			newTodo.save(function (err, newTodo) {
+				if (err) return console.log(err);
+				List.findOne({_id: req.params.list_id})
+				.populate('todos')
+				.exec(function (err, list) {
+					console.log(list);
+					list.todos.push(newTodo);
+					list.save(function (err, list) {
+						if (err) return console.log(err);
+						return res.json(list);
+					});
+				});
 			});
+		} else {
+			// create a todo, information comes from AJAX request from Angular
+			
+			var newTodo = new Todo();
+			newTodo.owner = req.user._id;
+			newTodo.list = req.user.info.currentList,
+			newTodo.text = req.body.text,
+			newTodo.done = false;
+
+			newTodo.save(function (err, newTodo) {
+				if (err) return console.log(err);
+				List.findOne({_id: req.user.info.currentList})
+				.populate('todos')
+				.exec(function (err, list) {
+					console.log(list);
+					list.todos.push(newTodo);
+					list.save(function (err, list) {
+						if (err) return console.log(err);
+						return res.json(list);
+					});
+				});
+			});
+		}
+	});
+
+	// delete a todo
+	app.delete('/api/list/:list_id/:todo_id', isLoggedIn, function (req, res) {
+		
+		if (req.params.list_id != ':list_id') {
+
+			Todo.remove({
+				_id: req.params.todo_id
+			}, function (err, todo) {
+				if (err)
+					return res.send(err);
+
+				console.log('After remove: ' + todo);
+
+				// use mongoose to get all todos in the database
+				List
+				.findOne({
+					_id: req.params.list_id
+				})
+				.populate('todos')
+				.exec(function (err, list) {
+					// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+					if (err)
+						return console.log(err);
+
+					return res.json(list); // return the list in JSON format
+				});
+			});
+		} else {
+			Todo.remove({
+				_id: req.params.todo_id
+			}, function (err, todo) {
+				if (err)
+					return res.send(err);
+
+				console.log('After remove: ' + todo);
+
+				// use mongoose to get all todos in the database
+				List
+				.findOne({
+					_id: req.user.info.currentList
+				})
+				.populate('todos')
+				.exec(function (err, list) {
+					// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+					if (err)
+						return console.log(err);
+
+					return res.json(list); // return the list in JSON format
+				});
+			});
+		}
+	});
+
+	// GET /api/lists
+	app.get('/api/lists', isLoggedIn, function (req, res) {
+		List.find({owner: req.user._id})
+		.exec(function (err, lists) {
+			if (err) {
+				console.log(err);
+				return res.send(err);
+			}
+			console.log(lists);
+			return res.json(lists);
+		});
+	});
+
+	// create list and send back all lists after creation
+	app.post('/api/lists/', isLoggedIn, function (req, res) {
+		// create a todo, information comes from AJAX request from Angular
+		List.create({
+			owner: req.user._id,
+			listTitle: req.body.list
+		}, function (err, list) {
+			if (err)
+				return res.send(err);
+			res.json(list);
+			// use mongoose to get all todos in the database
+			// List.find({owner: req.user._id})
+			// .exec(function (err, lists) {
+			// 	// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+			// 	if (err)
+			// 		return res.send(err);
+
+			// 	res.json(lists); // return all todos in JSON format
+			// });
 		});
 	});
 
 	// delete a todo
-	app.delete('/api/todos/:todo_id', isLoggedIn, function (req, res) {
-		Todo.remove({
-			_id: req.params.todo_id
+	app.delete('/api/list/:list_id', isLoggedIn, function (req, res) {
+		List.remove({
+			_id: req.params.list_id
 		}, function (err, rodo) {
 			if (err)
-				res.send(err);
+				return res.send(err);
 
 			// use mongoose to get all todos in the database
-			Todo.find({owner: req.user._id})
-			.exec(function (err, todos) {
+			List.find({owner: req.user._id})
+			.exec(function (err, lists) {
 				// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 				if (err)
-					res.send(err);
+					return res.send(err);
 
-				res.json(todos); // return all todos in JSON format
+				res.json(lists); // return all todos in JSON format
 			});
 		});
 	});
+
 
 	// // application --------------------------------------------
 	// app.get('*', function (req, res) {

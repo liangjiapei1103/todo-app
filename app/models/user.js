@@ -35,7 +35,9 @@ var userSchema = Schema({
 		name: String
 	},
 	info: {
-		todos: [{type: Schema.Types.ObjectId, ref: 'todos'}]
+		currentList: {type: Schema.Types.ObjectId, ref: 'List'},
+		lists: [{type: Schema.Types.ObjectId, ref: 'List'}],
+		todos: [{type: Schema.Types.ObjectId, ref: 'Todo'}]
 	}
 
 
