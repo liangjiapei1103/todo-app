@@ -5,6 +5,7 @@ var todo = angular.module('todo', []);
 function mainController($scope, $http) {
 	$scope.formData = {};
 
+
 	// when landing on the page, get all todos and show them
 	$http.get('/api/todos') 
 		.success(function (data) {

@@ -52,27 +52,38 @@
             <a class="navbar-brand" href="#">Todo List</a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
+
             <ul class="nav navbar-nav navbar-right">
               
+              	<% if (user) { %>
+
+				<li><a href='/logout' class="nav navbar-nav navbar-right">Logout</a></li>
+
+				<% } else { %>
+
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login<span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <li><a href="/login">Sign up</a></li>
-                  <li><a href="/signup">Login</a></li>
+                  <li><a href="/signup">Sign up</a></li>
+                  <li><a href="/login">Login</a></li>
                  
                   <li role="separator" class="divider"></li>
                   <li class="dropdown-header">Login with Others</li>
                    <li><a href="/auth/facebook"><span class="fa fa-facebook"></span>   Login with Facebook</a></li>
                    <li><a href="/auth/twitter"><span class="fa fa-twitter"></span> Login with Twitter</a></li>
                    <li><a href="/auth/google"><span class="fa fa-google-plus"></span> Login with Google</a></li>
+                   <li><a href="/logout">Logout</a></li>
                   </li>
                 </ul>
               </li>
+
+              <% } %>
+
             </ul>
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
-
+			<% if (user) { %>
 			<!-- HEADER AND TODO COUNT -->
 			<div class="jumbotron text-center">
 				<h1>Todo List <span class="label label-info">{{ todos.length }}</span></h1>
@@ -109,6 +120,7 @@
 					</form>
 				</div>
 			</div>
+			<% } %>
 
 		</div>
 	</body>

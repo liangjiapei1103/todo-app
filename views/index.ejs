@@ -1,29 +1,132 @@
-<!-- views/index.ejs -->
+<!-- index.html -->
 <!doctype html>
-<html>
-<head>
-    <title>Node Authentication</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
-    <style>
-        body        { padding-top:80px; }
-    </style>
-</head>
-<body>
-<div class="container">
 
-    <div class="jumbotron text-center">
-        <h1><span class="fa fa-lock"></span> Node Authentication</h1>
+<!-- ASSIGN OUR ANGULAR MODULE -->
+<html ng-app="todo">
+    <head>
+        <!-- META -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- optimize mobile viewport -->
 
-        <p>Login or Register with:</p>
 
-        <a href="/login" class="btn btn-default"><span class="fa fa-user"></span> Local Login</a>
-        <a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
-        <a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
-        <a href="/auth/twitter" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
-        <a href="/auth/google" class="btn btn-danger"><span class="fa fa-google-plus"></span> Google</a>
-    </div>
+        <title>Node/Angular Todo App</title>
 
-</div>
-</body>
+        <!-- SCROLLS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"> <!-- load bootstrap -->
+
+        <style>
+            html { overflow-y: scroll;}
+            body {padding-top: 50px;}
+            #todo-list {margin-bottom: 30px;}
+        </style>
+
+        <link href="./css/navbar.css" rel="stylesheet">
+
+        <!-- SPELLS -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script><!-- load jquery -->
+        <script src="./css/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script><!-- load angular -->
+        <script src="js/controllers/main.js"></script> <!-- load up our controller -->
+        <script src="js/services/todos.js"></script> <!-- load our todo service -->
+        <script src="js/core.js"></script>
+    </head>
+
+    <!-- SET THE CONTROLLER AND GET ALL TODOS -->
+    <body ng-controller="mainController">
+
+        
+
+        <div class="container">
+            
+            <!-- Static navbar -->
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Todo List</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+
+            <ul class="nav navbar-nav navbar-right">
+              
+                <% if (user) { %>
+
+                <li><a href='/logout' class="nav navbar-nav navbar-right">Logout</a></li>
+
+                <% } else { %>
+
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Login<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/signup">Sign up</a></li>
+                  <li><a href="/login">Login</a></li>
+                 
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Login with Others</li>
+                   <li><a href="/auth/facebook"><span class="fa fa-facebook"></span>   Login with Facebook</a></li>
+                   <li><a href="/auth/twitter"><span class="fa fa-twitter"></span> Login with Twitter</a></li>
+                   <li><a href="/auth/google"><span class="fa fa-google-plus"></span> Login with Google</a></li>
+                   <li><a href="/logout">Logout</a></li>
+                  </li>
+                </ul>
+              </li>
+
+              <% } %>
+
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
+
+            <% if (!user) { %>
+                <div class="alert alert-danger"><%= message %></div>
+            <% } %>
+            
+            <!-- HEADER AND TODO COUNT -->
+            <div class="jumbotron text-center">
+                <h1>Todo List <% if (user) { %><span class="label label-info">{{ todos.length }}</span><% } %></h1>
+            </div>
+
+            <!-- TODO LIST -->
+            <div id="todo-list" class="row">
+                <div class="col-sm-4 col-sm-offset-4">
+                    
+                    <!-- LOOP OVER THE TODOS IN $scope.todos -->
+                    <div class="checkbox" ng-repeat="todo in todos">
+                        <label>
+                            <input type="checkbox" ng-click="deleteTodo(todo._id)"> {{ todo.text }}
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- FORM TO CREATE TODOS -->
+            <div id="todo-form" class="row">
+                <div class="col-sm-8 col-sm-offset-2 text-center">
+                    <form>
+                        <div class="form-group">
+                            
+                            <!-- BIND THIS VALUE TO formData.text IN ANGULAR -->
+                            <input type="text" class="form-control input-lg text-center" placeholder="Thing to do" ng-model="formData.text">
+
+                        </div>
+
+                        <!-- createTodo() WILL CREATE NEW TODOS -->
+                        <button type="submit" class="btn btn-primary btn-lg" ng-disabled="!formData.text.length || buttonDisabled" ng-click="createTodo()">Add</button>
+
+                    </form>
+                </div>
+            </div>
+            
+
+        </div>
+    </body>
+
 </html>

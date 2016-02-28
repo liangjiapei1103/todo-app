@@ -3,9 +3,10 @@
 //load the things we need
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
+var Schema = mongoose.Schema;
 
 // define the schema for our user models
-var userSchema = mongoose.Schema({
+var userSchema = Schema({
 
 	local: {
 		email: String,
@@ -32,6 +33,9 @@ var userSchema = mongoose.Schema({
 		token: String,
 		email: String,
 		name: String
+	},
+	info: {
+		todos: [{type: Schema.Types.ObjectId, ref: 'todos'}]
 	}
 
 
